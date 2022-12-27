@@ -1,0 +1,392 @@
+definitions:
+  models.Category:
+    properties:
+      category_id:
+        type: string
+      category_name:
+        type: string
+      created_at:
+        type: string
+      parent_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.CreateCategory:
+    properties:
+      category_name:
+        type: string
+      parent_id:
+        type: string
+    type: object
+  models.CreateProduct:
+    properties:
+      category_id:
+        type: string
+      price:
+        type: string
+      product_name:
+        type: string
+    type: object
+  models.GetListCategoryResponse:
+    properties:
+      categories:
+        items:
+          $ref: '#/definitions/models.Category'
+        type: array
+      count:
+        type: integer
+    type: object
+  models.GetListProductResponse:
+    properties:
+      count:
+        type: integer
+      products:
+        items:
+          $ref: '#/definitions/models.Product'
+        type: array
+    type: object
+  models.Product:
+    properties:
+      category_id:
+        type: string
+      created_at:
+        type: string
+      price:
+        type: string
+      product_id:
+        type: string
+      product_name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.UpdateProduct:
+    properties:
+      category_id:
+        type: string
+      price:
+        type: string
+      product_id:
+        type: string
+      product_name:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /category:
+    get:
+      consumes:
+      - application/json
+      description: Get List Category
+      operationId: get_list_category
+      parameters:
+      - description: offset
+        in: query
+        name: offset
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetCategoryBody
+          schema:
+            $ref: '#/definitions/models.GetListCategoryResponse'
+        "400":
+          description: Invalid Argument
+          schema:
+            type: string
+        "500":
+          description: Server Error
+          schema:
+            type: string
+      summary: Get List Category
+      tags:
+      - Category
+    post:
+      consumes:
+      - application/json
+      description: Create Category
+      operationId: create_category
+      parameters:
+      - description: CreateCategoryRequestBody
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateCategory'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: GetCategoryBody
+          schema:
+            $ref: '#/definitions/models.Category'
+        "400":
+          description: Invalid Argument
+          schema:
+            type: string
+        "500":
+          description: Server Error
+          schema:
+            type: string
+      summary: Create Category
+      tags:
+      - Category
+  /category/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete By Id Category
+      operationId: delete_by_id_category
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetCategoryBody
+          schema:
+            $ref: '#/definitions/models.Category'
+        "400":
+          description: Invalid Argument
+          schema:
+            type: string
+        "500":
+          description: Server Error
+          schema:
+            type: string
+      summary: Delete By Id Category
+      tags:
+      - Category
+    get:
+      consumes:
+      - application/json
+      description: Get By Id Category
+      operationId: get_by_id_category
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetCategoryBody
+          schema:
+            $ref: '#/definitions/models.Category'
+        "400":
+          description: Invalid Argument
+          schema:
+            type: string
+        "500":
+          description: Server Error
+          schema:
+            type: string
+      summary: Get By Id Category
+      tags:
+      - Category
+    put:
+      consumes:
+      - application/json
+      description: Update Category
+      operationId: update_category
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: CreateCategoryRequestBody
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/models.Category'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetCategoriesBody
+          schema:
+            $ref: '#/definitions/models.Category'
+        "400":
+          description: Invalid Argument
+          schema:
+            type: string
+        "500":
+          description: Server Error
+          schema:
+            type: string
+      summary: Update Category
+      tags:
+      - Category
+  /product:
+    get:
+      consumes:
+      - application/json
+      description: Get List Product
+      operationId: get_list_product
+      parameters:
+      - description: offset
+        in: query
+        name: offset
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetProductBody
+          schema:
+            $ref: '#/definitions/models.GetListProductResponse'
+        "400":
+          description: Invalid Argument
+          schema:
+            type: string
+        "500":
+          description: Server Error
+          schema:
+            type: string
+      summary: Get List Product
+      tags:
+      - Product
+    post:
+      consumes:
+      - application/json
+      description: Create Product
+      operationId: create_product
+      parameters:
+      - description: CreateProductRequestBody
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateProduct'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: GetProductBody
+          schema:
+            $ref: '#/definitions/models.Product'
+        "400":
+          description: Invalid Argument
+          schema:
+            type: string
+        "500":
+          description: Server Error
+          schema:
+            type: string
+      summary: Create Product
+      tags:
+      - Product
+  /product/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete By Id Product
+      operationId: delete_by_id_product
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetProductBody
+          schema:
+            $ref: '#/definitions/models.Product'
+        "400":
+          description: Invalid Argument
+          schema:
+            type: string
+        "500":
+          description: Server Error
+          schema:
+            type: string
+      summary: Delete By Id Product
+      tags:
+      - Product
+    get:
+      consumes:
+      - application/json
+      description: Get By Id Product
+      operationId: get_by_id_product
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetProductBody
+          schema:
+            $ref: '#/definitions/models.Product'
+        "400":
+          description: Invalid Argument
+          schema:
+            type: string
+        "500":
+          description: Server Error
+          schema:
+            type: string
+      summary: Get By Id Product
+      tags:
+      - Product
+    put:
+      consumes:
+      - application/json
+      description: Update Product
+      operationId: update_product
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: CreateProductRequestBody
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateProduct'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: GetProductsBody
+          schema:
+            $ref: '#/definitions/models.Product'
+        "400":
+          description: Invalid Argument
+          schema:
+            type: string
+        "500":
+          description: Server Error
+          schema:
+            type: string
+      summary: Update Product
+      tags:
+      - Product
+swagger: "2.0"
