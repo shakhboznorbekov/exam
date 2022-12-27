@@ -251,6 +251,241 @@ const docTemplate = `{
                 }
             }
         },
+        "/order": {
+            "get": {
+                "description": "Get List Order",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Order"
+                ],
+                "summary": "Get List Order",
+                "operationId": "get_list_order",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "offset",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "limit",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "GetOrderBody",
+                        "schema": {
+                            "$ref": "#/definitions/models.Ords"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create Order",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Order"
+                ],
+                "summary": "Create Order",
+                "operationId": "create_order",
+                "parameters": [
+                    {
+                        "description": "CreateOrderRequestBody",
+                        "name": "order",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateOrders"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "GetOrderBody",
+                        "schema": {
+                            "$ref": "#/definitions/models.Order"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/order/{id}": {
+            "get": {
+                "description": "Get By Id Order",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Order"
+                ],
+                "summary": "Get By Id Order",
+                "operationId": "get_by_id_order",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "GetOrderBody",
+                        "schema": {
+                            "$ref": "#/definitions/models.Order"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update Order",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Order"
+                ],
+                "summary": "Update Order",
+                "operationId": "update_order",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "CreateOrderRequestBody",
+                        "name": "order",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateOrders"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "GetOrderBody",
+                        "schema": {
+                            "$ref": "#/definitions/models.Order"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete By Id Order",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Order"
+                ],
+                "summary": "Delete By Id Order",
+                "operationId": "delete_by_id_order",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "GetOrderBody",
+                        "schema": {
+                            "$ref": "#/definitions/models.Order"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Argument",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/product": {
             "get": {
                 "description": "Get List Product",
@@ -266,6 +501,12 @@ const docTemplate = `{
                 "summary": "Get List Product",
                 "operationId": "get_list_product",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "category_id",
+                        "name": "category_id",
+                        "in": "query"
+                    },
                     {
                         "type": "string",
                         "description": "offset",
@@ -500,6 +741,9 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
+                "deleted_at": {
+                    "type": "string"
+                },
                 "parent_id": {
                     "type": "string"
                 },
@@ -515,6 +759,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "parent_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CreateOrders": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "product_id": {
                     "type": "string"
                 }
             }
@@ -561,6 +816,48 @@ const docTemplate = `{
                 }
             }
         },
+        "models.Order": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "order_id": {
+                    "type": "string"
+                },
+                "product": {
+                    "$ref": "#/definitions/models.OrderProduct"
+                }
+            }
+        },
+        "models.OrderProduct": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "order_id": {
+                    "type": "string"
+                },
+                "product": {
+                    "$ref": "#/definitions/models.ProductCategory"
+                }
+            }
+        },
+        "models.Ords": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "orders": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Order"
+                    }
+                }
+            }
+        },
         "models.Product": {
             "type": "object",
             "properties": {
@@ -568,6 +865,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "created_at": {
+                    "type": "string"
+                },
+                "deleted_at": {
                     "type": "string"
                 },
                 "price": {
@@ -580,6 +880,20 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ProductCategory": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "parent_id": {
                     "type": "string"
                 }
             }

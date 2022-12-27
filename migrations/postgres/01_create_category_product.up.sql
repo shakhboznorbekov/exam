@@ -14,6 +14,14 @@
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, 
         updated_at TIMESTAMP NOT NULL
     );
+     CREATE TABLE orders (
+         orders_id UUID NOT NULL PRIMARY KEY,
+         description  VARCHAR,
+         product_id UUID NOT NULL REFERENCES product(product_id),
+         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+         updated_at TIMESTAMP NOT NULL,
+         deleted_at TIMESTAMP
+    )
 
 
     -- CREATE TABLE order (

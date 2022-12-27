@@ -27,6 +27,12 @@ func SetUpApi(cfg *config.Config, r *gin.Engine, storage storage.StorageI) {
 	r.PUT("/category/:id", handlerV1.UpdateCategory)
 	r.DELETE("/category/:id", handlerV1.DeleteCategory)
 
+	r.POST("/order", handlerV1.CreateOrder)
+	r.GET("/order/:id", handlerV1.GetOrderById)
+	r.GET("/order", handlerV1.GetOrderList)
+	r.PUT("/order/:id", handlerV1.UpdateOrder)
+	r.DELETE("/order/:id", handlerV1.DeleteOrder)
+
 	url := ginSwagger.URL("swagger/doc.json") // The url pointing to API definition
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 }
