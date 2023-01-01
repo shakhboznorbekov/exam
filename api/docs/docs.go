@@ -182,13 +182,13 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Category"
+                            "$ref": "#/definitions/models.UpdateCategorySwagger"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "GetCategoriesBody",
+                        "description": "GetCategorysBody",
                         "schema": {
                             "$ref": "#/definitions/models.Category"
                         }
@@ -283,7 +283,7 @@ const docTemplate = `{
                     "200": {
                         "description": "GetOrderBody",
                         "schema": {
-                            "$ref": "#/definitions/models.Ords"
+                            "$ref": "#/definitions/models.GetListOrderResponse"
                         }
                     },
                     "400": {
@@ -320,13 +320,13 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.CreateOrders"
+                            "$ref": "#/definitions/models.CreateOrder"
                         }
                     }
                 ],
                 "responses": {
                     "201": {
-                        "description": "GetOrderBody",
+                        "description": "GetorderBody",
                         "schema": {
                             "$ref": "#/definitions/models.Order"
                         }
@@ -417,13 +417,13 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.CreateOrders"
+                            "$ref": "#/definitions/models.UpdateOrderSwagger"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "GetOrderBody",
+                        "description": "GetordersBody",
                         "schema": {
                             "$ref": "#/definitions/models.Order"
                         }
@@ -501,12 +501,6 @@ const docTemplate = `{
                 "summary": "Get List Product",
                 "operationId": "get_list_product",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "category_id",
-                        "name": "category_id",
-                        "in": "query"
-                    },
                     {
                         "type": "string",
                         "description": "offset",
@@ -658,7 +652,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UpdateProduct"
+                            "$ref": "#/definitions/models.UpdateProductSwagger"
                         }
                     }
                 ],
@@ -732,16 +726,39 @@ const docTemplate = `{
         "models.Category": {
             "type": "object",
             "properties": {
-                "category_id": {
+                "created_at": {
                     "type": "string"
                 },
-                "category_name": {
+                "id": {
                     "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "parent_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CategoryList": {
+            "type": "object",
+            "properties": {
+                "childs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Category"
+                    }
                 },
                 "created_at": {
                     "type": "string"
                 },
-                "deleted_at": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 },
                 "parent_id": {
@@ -755,7 +772,7 @@ const docTemplate = `{
         "models.CreateCategory": {
             "type": "object",
             "properties": {
-                "category_name": {
+                "name": {
                     "type": "string"
                 },
                 "parent_id": {
@@ -763,7 +780,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.CreateOrders": {
+        "models.CreateOrder": {
             "type": "object",
             "properties": {
                 "description": {
@@ -780,11 +797,11 @@ const docTemplate = `{
                 "category_id": {
                     "type": "string"
                 },
-                "price": {
+                "name": {
                     "type": "string"
                 },
-                "product_name": {
-                    "type": "string"
+                "price": {
+                    "type": "number"
                 }
             }
         },
@@ -794,11 +811,25 @@ const docTemplate = `{
                 "categories": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.Category"
+                        "$ref": "#/definitions/models.CategoryList"
                     }
                 },
                 "count": {
                     "type": "integer"
+                }
+            }
+        },
+        "models.GetListOrderResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "orders": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.OrderList"
+                    }
                 }
             }
         },
@@ -819,42 +850,37 @@ const docTemplate = `{
         "models.Order": {
             "type": "object",
             "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },
-                "order_id": {
+                "id": {
                     "type": "string"
                 },
-                "product": {
-                    "$ref": "#/definitions/models.OrderProduct"
+                "product_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
                 }
             }
         },
-        "models.OrderProduct": {
+        "models.OrderList": {
             "type": "object",
             "properties": {
                 "description": {
                     "type": "string"
                 },
-                "order_id": {
+                "id": {
                     "type": "string"
                 },
                 "product": {
-                    "$ref": "#/definitions/models.ProductCategory"
-                }
-            }
-        },
-        "models.Ords": {
-            "type": "object",
-            "properties": {
-                "count": {
-                    "type": "integer"
-                },
-                "orders": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.Order"
-                    }
+                    "$ref": "#/definitions/models.ProductList"
                 }
             }
         },
@@ -870,14 +896,14 @@ const docTemplate = `{
                 "deleted_at": {
                     "type": "string"
                 },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
                 "price": {
-                    "type": "string"
-                },
-                "product_id": {
-                    "type": "string"
-                },
-                "product_name": {
-                    "type": "string"
+                    "type": "number"
                 },
                 "updated_at": {
                     "type": "string"
@@ -898,20 +924,53 @@ const docTemplate = `{
                 }
             }
         },
-        "models.UpdateProduct": {
+        "models.ProductList": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "$ref": "#/definitions/models.ProductCategory"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.UpdateCategorySwagger": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "parent_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.UpdateOrderSwagger": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "product_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.UpdateProductSwagger": {
             "type": "object",
             "properties": {
                 "category_id": {
                     "type": "string"
                 },
+                "name": {
+                    "type": "string"
+                },
                 "price": {
-                    "type": "string"
-                },
-                "product_id": {
-                    "type": "string"
-                },
-                "product_name": {
-                    "type": "string"
+                    "type": "number"
                 }
             }
         }

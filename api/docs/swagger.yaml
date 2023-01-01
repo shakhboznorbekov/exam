@@ -1,13 +1,28 @@
 definitions:
   models.Category:
     properties:
-      category_id:
-        type: string
-      category_name:
-        type: string
       created_at:
         type: string
-      deleted_at:
+      id:
+        type: string
+      name:
+        type: string
+      parent_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.CategoryList:
+    properties:
+      childs:
+        items:
+          $ref: '#/definitions/models.Category'
+        type: array
+      created_at:
+        type: string
+      id:
+        type: string
+      name:
         type: string
       parent_id:
         type: string
@@ -16,12 +31,12 @@ definitions:
     type: object
   models.CreateCategory:
     properties:
-      category_name:
+      name:
         type: string
       parent_id:
         type: string
     type: object
-  models.CreateOrders:
+  models.CreateOrder:
     properties:
       description:
         type: string
@@ -32,19 +47,28 @@ definitions:
     properties:
       category_id:
         type: string
+      name:
+        type: string
       price:
-        type: string
-      product_name:
-        type: string
+        type: number
     type: object
   models.GetListCategoryResponse:
     properties:
       categories:
         items:
-          $ref: '#/definitions/models.Category'
+          $ref: '#/definitions/models.CategoryList'
         type: array
       count:
         type: integer
+    type: object
+  models.GetListOrderResponse:
+    properties:
+      count:
+        type: integer
+      orders:
+        items:
+          $ref: '#/definitions/models.OrderList'
+        type: array
     type: object
   models.GetListProductResponse:
     properties:
@@ -57,30 +81,27 @@ definitions:
     type: object
   models.Order:
     properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
       description:
         type: string
-      order_id:
+      id:
         type: string
-      product:
-        $ref: '#/definitions/models.OrderProduct'
+      product_id:
+        type: string
+      updated_at:
+        type: string
     type: object
-  models.OrderProduct:
+  models.OrderList:
     properties:
       description:
         type: string
-      order_id:
+      id:
         type: string
       product:
-        $ref: '#/definitions/models.ProductCategory'
-    type: object
-  models.Ords:
-    properties:
-      count:
-        type: integer
-      orders:
-        items:
-          $ref: '#/definitions/models.Order'
-        type: array
+        $ref: '#/definitions/models.ProductList'
     type: object
   models.Product:
     properties:
@@ -90,12 +111,12 @@ definitions:
         type: string
       deleted_at:
         type: string
+      id:
+        type: string
+      name:
+        type: string
       price:
-        type: string
-      product_id:
-        type: string
-      product_name:
-        type: string
+        type: number
       updated_at:
         type: string
     type: object
@@ -108,16 +129,37 @@ definitions:
       parent_id:
         type: string
     type: object
-  models.UpdateProduct:
+  models.ProductList:
     properties:
-      category_id:
+      category:
+        $ref: '#/definitions/models.ProductCategory'
+      id:
         type: string
-      price:
+      name:
+        type: string
+    type: object
+  models.UpdateCategorySwagger:
+    properties:
+      name:
+        type: string
+      parent_id:
+        type: string
+    type: object
+  models.UpdateOrderSwagger:
+    properties:
+      description:
         type: string
       product_id:
         type: string
-      product_name:
+    type: object
+  models.UpdateProductSwagger:
+    properties:
+      category_id:
         type: string
+      name:
+        type: string
+      price:
+        type: number
     type: object
 info:
   contact: {}
@@ -260,12 +302,12 @@ paths:
         name: category
         required: true
         schema:
-          $ref: '#/definitions/models.Category'
+          $ref: '#/definitions/models.UpdateCategorySwagger'
       produces:
       - application/json
       responses:
         "200":
-          description: GetCategoriesBody
+          description: GetCategorysBody
           schema:
             $ref: '#/definitions/models.Category'
         "400":
@@ -300,7 +342,7 @@ paths:
         "200":
           description: GetOrderBody
           schema:
-            $ref: '#/definitions/models.Ords'
+            $ref: '#/definitions/models.GetListOrderResponse'
         "400":
           description: Invalid Argument
           schema:
@@ -323,12 +365,12 @@ paths:
         name: order
         required: true
         schema:
-          $ref: '#/definitions/models.CreateOrders'
+          $ref: '#/definitions/models.CreateOrder'
       produces:
       - application/json
       responses:
         "201":
-          description: GetOrderBody
+          description: GetorderBody
           schema:
             $ref: '#/definitions/models.Order'
         "400":
@@ -417,12 +459,12 @@ paths:
         name: order
         required: true
         schema:
-          $ref: '#/definitions/models.CreateOrders'
+          $ref: '#/definitions/models.UpdateOrderSwagger'
       produces:
       - application/json
       responses:
         "200":
-          description: GetOrderBody
+          description: GetordersBody
           schema:
             $ref: '#/definitions/models.Order'
         "400":
@@ -443,10 +485,6 @@ paths:
       description: Get List Product
       operationId: get_list_product
       parameters:
-      - description: category_id
-        in: query
-        name: category_id
-        type: string
       - description: offset
         in: query
         name: offset
@@ -578,7 +616,7 @@ paths:
         name: product
         required: true
         schema:
-          $ref: '#/definitions/models.UpdateProduct'
+          $ref: '#/definitions/models.UpdateProductSwagger'
       produces:
       - application/json
       responses:

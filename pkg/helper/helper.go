@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"database/sql"
 	"strconv"
 	"strings"
 )
@@ -24,4 +25,15 @@ func ReplaceQueryParams(namedQuery string, params map[string]interface{}) (strin
 	}
 
 	return namedQuery, args
+}
+
+func NewNullString(s string) sql.NullString {
+	if len(s) == 0 {
+		return sql.NullString{}
+	}
+
+	return sql.NullString{
+		String: s,
+		Valid:  true,
+	}
 }

@@ -20,12 +20,12 @@ import (
 // @Tags Order
 // @Accept json
 // @Produce json
-// @Param order body models.CreateOrders true "CreateOrderRequestBody"
-// @Success 201 {object} models.Order "GetOrderBody"
+// @Param order body models.CreateOrder true "CreateOrderRequestBody"
+// @Success 201 {object} models.Order "GetorderBody"
 // @Response 400 {object} string "Invalid Argument"
 // @Failure 500 {object} string "Server Error"
 func (h *HandlerV1) CreateOrder(c *gin.Context) {
-	var order models.CreateOrders
+	var order models.CreateOrder
 
 	err := c.ShouldBindJSON(&order)
 	if err != nil {
@@ -43,7 +43,7 @@ func (h *HandlerV1) CreateOrder(c *gin.Context) {
 
 	resp, err := h.storage.Order().GetByPKey(
 		context.Background(),
-		&models.OrdersPrimarKey{Id: id},
+		&models.OrderPrimaryKey{Id: id},
 	)
 
 	if err != nil {
@@ -73,7 +73,7 @@ func (h *HandlerV1) GetOrderById(c *gin.Context) {
 
 	resp, err := h.storage.Order().GetByPKey(
 		context.Background(),
-		&models.OrdersPrimarKey{Id: id},
+		&models.OrderPrimaryKey{Id: id},
 	)
 
 	if err != nil {
@@ -95,7 +95,7 @@ func (h *HandlerV1) GetOrderById(c *gin.Context) {
 // @Produce json
 // @Param offset query string false "offset"
 // @Param limit query string false "limit"
-// @Success 200 {object} models.Ords "GetOrderBody"
+// @Success 200 {object} models.GetListOrderResponse "GetOrderBody"
 // @Response 400 {object} string "Invalid Argument"
 // @Failure 500 {object} string "Server Error"
 func (h *HandlerV1) GetOrderList(c *gin.Context) {
@@ -127,7 +127,7 @@ func (h *HandlerV1) GetOrderList(c *gin.Context) {
 
 	resp, err := h.storage.Order().GetList(
 		context.Background(),
-		&models.GetListOrdersRequest{
+		&models.GetListOrderRequest{
 			Limit:  int32(limit),
 			Offset: int32(offset),
 		},
@@ -140,6 +140,7 @@ func (h *HandlerV1) GetOrderList(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, resp)
+
 }
 
 // UpdateOrder godoc
@@ -151,19 +152,19 @@ func (h *HandlerV1) GetOrderList(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "id"
-// @Param order body models.CreateOrders true "CreateOrderRequestBody"
-// @Success 200 {object} models.Order "GetOrderBody"
+// @Param order body models.UpdateOrderSwagger true "CreateOrderRequestBody"
+// @Success 200 {object} models.Order "GetordersBody"
 // @Response 400 {object} string "Invalid Argument"
 // @Failure 500 {object} string "Server Error"
 func (h *HandlerV1) UpdateOrder(c *gin.Context) {
 
 	var (
-		order models.UpdateOrders
+		order models.UpdateOrder
 	)
 
-	order.Id = c.Param("id")
+	id := c.Param("id")
 
-	if order.Id == "" {
+	if id == "" {
 		log.Printf("error whiling update: %v\n", errors.New("required order id").Error())
 		c.JSON(http.StatusBadRequest, errors.New("required order id").Error())
 		return
@@ -175,6 +176,8 @@ func (h *HandlerV1) UpdateOrder(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
+
+	order.Id = id
 
 	rowsAffected, err := h.storage.Order().Update(
 		context.Background(),
@@ -195,7 +198,7 @@ func (h *HandlerV1) UpdateOrder(c *gin.Context) {
 
 	resp, err := h.storage.Order().GetByPKey(
 		context.Background(),
-		&models.OrdersPrimarKey{Id: order.Id},
+		&models.OrderPrimaryKey{Id: id},
 	)
 
 	if err != nil {
@@ -207,7 +210,7 @@ func (h *HandlerV1) UpdateOrder(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-// DeleteByOrder godoc
+// DeleteByIdOrder godoc
 // @ID delete_by_id_order
 // @Router /order/{id} [DELETE]
 // @Summary Delete By Id Order
@@ -230,7 +233,7 @@ func (h *HandlerV1) DeleteOrder(c *gin.Context) {
 
 	err := h.storage.Order().Delete(
 		context.Background(),
-		&models.OrdersPrimarKey{
+		&models.OrderPrimaryKey{
 			Id: id,
 		},
 	)

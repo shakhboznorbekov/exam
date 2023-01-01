@@ -14,7 +14,7 @@ type Store struct {
 	db       *pgxpool.Pool
 	category *CategoryRepo
 	product  *ProductRepo
-	order    *OrdersRepo
+	order    *OrderRepo
 }
 
 func NewPostgres(ctx context.Context, cfg config.Config) (storage.StorageI, error) {
@@ -27,7 +27,7 @@ func NewPostgres(ctx context.Context, cfg config.Config) (storage.StorageI, erro
 		cfg.PostgresDatabase,
 	))
 	if err != nil {
-		// return nil, err
+		return nil, err
 	}
 
 	config.MaxConns = cfg.PostgresMaxConnections
@@ -41,13 +41,23 @@ func NewPostgres(ctx context.Context, cfg config.Config) (storage.StorageI, erro
 		db:       pool,
 		category: NewCategoryRepo(pool),
 		product:  NewProductRepo(pool),
-		order:    NewOrdersRepo(pool),
+		order:    NewOrderRepo(pool),
 	}, err
 }
 
 func (s *Store) CloseDB() {
 	s.db.Close()
 }
+
+func (s *Store) Category() storage.CategoryRepoI {
+
+	if s.category == nil {
+		s.category = NewCategoryRepo(s.db)
+	}
+
+	return s.category
+}
+
 func (s *Store) Product() storage.ProductRepoI {
 
 	if s.product == nil {
@@ -57,20 +67,11 @@ func (s *Store) Product() storage.ProductRepoI {
 	return s.product
 }
 
-func (s *Store) Category() storage.CategoryRepoI {
-
-	if s.category == nil {
-		s.category = NewCategoryRepo(s.db)
-	}
-
-	return s.Category()
-}
-
-func (s *Store) Order() storage.OrdersRepoI {
+func (s *Store) Order() storage.OrderRepoI{
 
 	if s.order == nil {
-		s.order = NewOrdersRepo(s.db)
+		s.order = NewOrderRepo(s.db)
 	}
 
-	return s.Order()
+	return s.order
 }

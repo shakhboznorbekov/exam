@@ -12,17 +12,17 @@ import (
 	"crud/pkg/helper"
 )
 
-type OrdersRepo struct {
+type OrderRepo struct {
 	db *pgxpool.Pool
 }
 
-func NewOrdersRepo(db *pgxpool.Pool) *OrdersRepo {
-	return &OrdersRepo{
+func NewOrderRepo(db *pgxpool.Pool) *OrderRepo {
+	return &OrderRepo{
 		db: db,
 	}
 }
 
-func (f *OrdersRepo) Create(ctx context.Context, orders *models.CreateOrders) (string, error) {
+func (f *OrderRepo) Create(ctx context.Context, order *models.CreateOrder) (string, error) {
 
 	var (
 		id    = uuid.New().String()
@@ -31,17 +31,16 @@ func (f *OrdersRepo) Create(ctx context.Context, orders *models.CreateOrders) (s
 
 	query = `
 		INSERT INTO orders(
-			orders_id,
-			description, 
-			poduct_id, 
+			id,
+			description,
+			product_id,
 			updated_at
-		) VALUES ( $1, $2 , $3, now())
+		) VALUES ( $1, $2, $3, now() )
 	`
-
 	_, err := f.db.Exec(ctx, query,
 		id,
-		orders.Description,
-		orders.ProductId,
+		order.Description,
+		order.Product_id,
 	)
 
 	if err != nil {
@@ -51,74 +50,69 @@ func (f *OrdersRepo) Create(ctx context.Context, orders *models.CreateOrders) (s
 	return id, nil
 }
 
-func (f *OrdersRepo) GetByPKey(ctx context.Context, pkey *models.OrdersPrimarKey) (*models.Order, error) {
+func (f *OrderRepo) GetByPKey(ctx context.Context, pkey *models.OrderPrimaryKey) (*models.OrderList, error) {
 
 	var (
-		id          sql.NullString
-		description sql.NullString
-		productId   sql.NullString
-		createdAt   sql.NullString
-		updatedAt   sql.NullString
-		respCg      = models.ProductCategory{}
-		respProduct = models.OrderProduct{}
+		productCategory models.ProductCategory
+		productList     models.ProductList
+		orderList       models.OrderList
+
+		orderId          sql.NullString
+		orderDescription sql.NullString
+		productId        sql.NullString
+		productName      sql.NullString
+		categoryId       sql.NullString
+		categoryName     sql.NullString
+		categoryParentId sql.NullString
 	)
 
 	query := `
-		SELECT
-			orders_id,
-			description,
-			product_id, 
-			created_at,
-			updated_at
-		FROM
-			orders
-		WHERE orders_id = $1
+	SELECT
+		orders.id,
+		orders.description,
+		products.id,
+		products.name,
+		categories.id,
+		categories.name,
+		categories.parent_id
+	FROM
+    	orders
+	JOIN products ON orders.product_id = products.id
+	JOIN categories ON products.category_id = categories.id
+	WHERE orders.deleted_at IS NULL AND products.deleted_at IS NULL AND categories.deleted_at IS NULL AND orders.id = $1
 	`
 
-	err := f.db.QueryRow(ctx, query, pkey.Id).
-		Scan(
-			&id,
-			&description,
-			&productId,
-			&createdAt,
-			&updatedAt,
-		)
+	err := f.db.QueryRow(ctx, query, pkey.Id).Scan(
+		&orderId,
+		&orderDescription,
+		&productId,
+		&productName,
+		&categoryId,
+		&categoryName,
+		&categoryParentId,
+	)
 
-	if err != nil {
-		return nil, err
-	}
+	productCategory.Id = categoryId.String
+	productCategory.Name = categoryName.String
+	productCategory.ParentID = categoryParentId.String
 
-	var categoryId string
-	err = f.db.QueryRow(ctx,
-		"select product_id, product_name, category_id from products where product_id = $1",
-		productId).Scan(&respProduct.Id, &respProduct.Name, &categoryId)
-	if err != nil {
-		return nil, err
-	}
+	productList.Id = productId.String
+	productList.Name = productName.String
+	productList.Category = productCategory
 
-	err = f.db.QueryRow(ctx,
-		"select category_id, category_name, parent_id from category where category_id = $1",
-		categoryId).Scan(&respCg.Id, &respCg.Name, &respCg.ParentId)
-	if err != nil {
-		return nil, err
-	}
-	respProduct.Category = respCg
+	orderList.Id = orderId.String
+	orderList.Description = orderDescription.String
+	orderList.Product = productList
 
-	return &models.Order{
-		OrderId:     id.String,
-		Description: description.String,
-		Product:     respProduct,
-	}, nil
+	return &orderList, err
 }
 
-func (f *OrdersRepo) GetList(ctx context.Context, req *models.GetListOrdersRequest) (*models.Ords, error) {
+func (f *OrderRepo) GetList(ctx context.Context, req *models.GetListOrderRequest) (*models.GetListOrderResponse, error) {
 
 	var (
-		respMain    = models.Ords{}
-		respCg      = models.ProductCategory{}
-		respProduct = models.OrderProduct{}
-		offset      = " OFFSET 0"
-		limit       = " LIMIT 20"
+		resp   = models.GetListOrderResponse{}
+		offset = ""
+		limit  = ""
 	)
 
 	if req.Limit > 0 {
@@ -131,54 +125,73 @@ func (f *OrdersRepo) GetList(ctx context.Context, req *models.GetListOrdersReque
 
 	query := `
 	SELECT
-	orders_id,
-	description,
-	product_id, 
+		COUNT(*) OVER(),
+		orders.id,
+		orders.description,
+		products.id,
+		products.name,
+		categories.id,
+		categories.name,
+		categories.parent_id
 	FROM
-	orders WHERE deleted_at = 0;
+    	orders
+	JOIN products ON orders.product_id = products.id
+	JOIN categories ON products.category_id = categories.id
+	WHERE orders.deleted_at IS NULL AND products.deleted_at IS NULL AND categories.deleted_at IS NULL
 	`
+
 	query += offset + limit
 
 	rows, err := f.db.Query(ctx, query)
-	if err != nil {
-		return nil, err
-	}
 
 	for rows.Next() {
-		res := &models.Order{}
-		prId := ""
-		err := rows.Scan(
-			&res.OrderId,
-			&res.Description,
-			&prId,
+		var (
+			productCategory models.ProductCategory
+			productList     models.ProductList
+
+			orderId          sql.NullString
+			orderDescription sql.NullString
+			productId        sql.NullString
+			productName      sql.NullString
+			categoryId       sql.NullString
+			categoryName     sql.NullString
+			categoryParentId sql.NullString
 		)
 
+		err := rows.Scan(
+			&resp.Count,
+			&orderId,
+			&orderDescription,
+			&productId,
+			&productName,
+			&categoryId,
+			&categoryName,
+			&categoryParentId,
+		)
 		if err != nil {
 			return nil, err
 		}
 
-		var categoryId string
-		err = f.db.QueryRow(ctx,
-			"select product_id, product_name, category_id from products where product_id = $1",
-			prId).Scan(&respProduct.Id, &respProduct.Name, &categoryId)
-		if err != nil {
-			return nil, err
-		}
+		productCategory.Id = categoryId.String
+		productCategory.Name = categoryName.String
+		productCategory.ParentID = categoryParentId.String
 
-		err = f.db.QueryRow(ctx,
-			"select category_id, category_name, parent_id from category where category_id = $1",
-			categoryId).Scan(&respCg.Id, &respCg.Name, &respCg.ParentId)
-		if err != nil {
-			return nil, err
-		}
-		respProduct.Category = respCg
-		res.Product = respProduct
-		respMain.Order = append(respMain.Order, res)
+		productList.Id = productId.String
+		productList.Name = productName.String
+		productList.Category = productCategory
+
+		resp.Orders = append(resp.Orders, models.OrderList{
+			Id:          orderId.String,
+			Description: orderDescription.String,
+			Product:     productList,
+		})
+
 	}
-	return &respMain, err
+
+	return &resp, err
 }
 
-func (f *OrdersRepo) Update(ctx context.Context, req *models.UpdateOrders) (int64, error) {
+func (f *OrderRepo) Update(ctx context.Context, req *models.UpdateOrder) (int64, error) {
 
 	var (
 		query  = ""
@@ -190,15 +203,15 @@ func (f *OrdersRepo) Update(ctx context.Context, req *models.UpdateOrders) (int6
 			orders
 		SET
 			description = :description,
-			product_id = :product_id, 
+			product_id = :product_id,
 			updated_at = now()
-		WHERE orders_id = :orders_id
+		WHERE id = :id
 	`
 
 	params = map[string]interface{}{
-		"orders_id":   req.Id,
+		"id":          req.Id,
 		"description": req.Description,
-		"product_id":  req.ProductId,
+		"product_id":  req.Product_id,
 	}
 
 	query, args := helper.ReplaceQueryParams(query, params)
@@ -211,12 +224,12 @@ func (f *OrdersRepo) Update(ctx context.Context, req *models.UpdateOrders) (int6
 	return rowsAffected.RowsAffected(), nil
 }
 
-func (f *OrdersRepo) Delete(ctx context.Context, req *models.OrdersPrimarKey) error {
+func (f *OrderRepo) Delete(ctx context.Context, req *models.OrderPrimaryKey) error {
 
-	_, err := f.db.Exec(ctx, "DELETE FROM category WHERE orders_id = $1", req.Id)
+	_, err := f.db.Exec(ctx, "UPDATE orders SET deleted_at = now() WHERE id = $1", req.Id)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	return err
 }

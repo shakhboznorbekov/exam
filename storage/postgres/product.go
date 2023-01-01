@@ -30,20 +30,20 @@ func (f *ProductRepo) Create(ctx context.Context, product *models.CreateProduct)
 	)
 
 	query = `
-		INSERT INTO film_(
-			product_id,
-			product_name, 
-			price, 
-			category_id, 
+		INSERT INTO products(
+			id,
+			name,
+			price,
+			category_id,
 			updated_at
-		) VALUES ( $1, $2 , $3, $4, now())
+		) VALUES ( $1, $2, $3, $4, now() )
 	`
 
 	_, err := f.db.Exec(ctx, query,
 		id,
-		product.ProductName,
+		product.Name,
 		product.Price,
-		product.CategoryId,
+		product.CategoryID,
 	)
 
 	if err != nil {
@@ -53,36 +53,36 @@ func (f *ProductRepo) Create(ctx context.Context, product *models.CreateProduct)
 	return id, nil
 }
 
-func (f *ProductRepo) GetByPKey(ctx context.Context, pkey *models.ProductPrimarKey) (*models.Product, error) {
+func (f *ProductRepo) GetByPKey(ctx context.Context, pkey *models.ProductPrimaryKey) (*models.Product, error) {
 
 	var (
-		id                sql.NullString
-		productName       sql.NullString
-		productPrice      sql.NullString
-		productCategoryId sql.NullString
-		createdAt         sql.NullString
-		updatedAt         sql.NullString
+		id          sql.NullString
+		name        sql.NullString
+		price       sql.NullFloat64
+		category_id sql.NullString
+		createdAt   sql.NullString
+		updatedAt   sql.NullString
 	)
 
 	query := `
 		SELECT
-			product_id,
-			product_name,
+			id,
+			name,
 			price,
-			category_id, 
+			category_id,
 			created_at,
 			updated_at
 		FROM
-			product
-		WHERE product_id = $1
+			products
+		WHERE products.deleted_at IS NULL AND id = $1
 	`
 
 	err := f.db.QueryRow(ctx, query, pkey.Id).
 		Scan(
 			&id,
-			&productName,
-			&productPrice,
-			&productCategoryId,
+			&name,
+			&price,
+			&category_id,
 			&createdAt,
 			&updatedAt,
 		)
@@ -92,12 +92,12 @@ func (f *ProductRepo) GetByPKey(ctx context.Context, pkey *models.ProductPrimarK
 	}
 
 	return &models.Product{
-		Id:          id.String,
-		ProductName: productName.String,
-		Price:       productPrice.String,
-		CategoryId:  productCategoryId.String,
-		CreatedAt:   createdAt.String,
-		UpdatedAt:   updatedAt.String,
+		Id:         id.String,
+		Name:       name.String,
+		Price:      price.Float64,
+		CategoryID: category_id.String,
+		CreatedAt:  createdAt.String,
+		UpdatedAt:  updatedAt.String,
 	}, nil
 }
 
@@ -105,35 +105,31 @@ func (f *ProductRepo) GetList(ctx context.Context, req *models.GetListProductReq
 
 	var (
 		resp   = models.GetListProductResponse{}
-		offset = " OFFSET 0"
-		limit  = " LIMIT 2"
+		offset = ""
+		limit  = ""
 	)
-	query := `
-		SELECT
-		COUNT(*) OVER(),
-		product_id,
-		product_name,
-		price, 
-		category_id,
-		created_at,
-		updated_at
-	FROM
-		product
-	WHERE 
-		deleted_at is null	
-	`
 
 	if req.Limit > 0 {
 		limit = fmt.Sprintf(" LIMIT %d", req.Limit)
 	}
 
-	if req.CategoryId != "" {
-		query += " AND category_id = '" + req.CategoryId + "' "
-	}
-
 	if req.Offset > 0 {
 		offset = fmt.Sprintf(" OFFSET %d", req.Offset)
 	}
+
+	query := `
+		SELECT
+			COUNT(*) OVER(),
+			id,
+			name,
+			price,
+			category_id,
+			created_at,
+			updated_at
+		FROM
+			products
+		WHERE products.deleted_at IS NULL
+	`
 
 	query += offset + limit
 
@@ -143,9 +139,9 @@ func (f *ProductRepo) GetList(ctx context.Context, req *models.GetListProductReq
 
 		var (
 			id          sql.NullString
-			productName sql.NullString
-			price       sql.NullString
-			categoryId  sql.NullString
+			name        sql.NullString
+			price       sql.NullFloat64
+			category_id sql.NullString
 			createdAt   sql.NullString
 			updatedAt   sql.NullString
 		)
@@ -153,9 +149,9 @@ func (f *ProductRepo) GetList(ctx context.Context, req *models.GetListProductReq
 		err := rows.Scan(
 			&resp.Count,
 			&id,
-			&productName,
+			&name,
 			&price,
-			&categoryId,
+			&category_id,
 			&createdAt,
 			&updatedAt,
 		)
@@ -164,13 +160,13 @@ func (f *ProductRepo) GetList(ctx context.Context, req *models.GetListProductReq
 			return nil, err
 		}
 
-		resp.Products = append(resp.Products, &models.Product{
-			Id:          id.String,
-			ProductName: productName.String,
-			Price:       price.String,
-			CategoryId:  categoryId.String,
-			CreatedAt:   createdAt.String,
-			UpdatedAt:   updatedAt.String,
+		resp.Products = append(resp.Products, models.Product{
+			Id:         id.String,
+			Name:       name.String,
+			Price:      price.Float64,
+			CategoryID: category_id.String,
+			CreatedAt:  createdAt.String,
+			UpdatedAt:  updatedAt.String,
 		})
 
 	}
@@ -187,20 +183,20 @@ func (f *ProductRepo) Update(ctx context.Context, req *models.UpdateProduct) (in
 
 	query = `
 		UPDATE
-			product
+			products
 		SET
-			product_name = :product_name,
+			name = :name,
 			price = :price,
-			category_id = :category_id 
+			category_id = :category_id,
 			updated_at = now()
-		WHERE product_id = :product_id
+		WHERE id = :id
 	`
 
 	params = map[string]interface{}{
-		"product_id":   req.Id,
-		"product_name": req.ProductName,
-		"price":        req.Price,
-		"category_id":  req.CategoryId,
+		"id":          req.Id,
+		"name":        req.Name,
+		"price":       req.Price,
+		"category_id": req.CategoryID,
 	}
 
 	query, args := helper.ReplaceQueryParams(query, params)
@@ -213,16 +209,9 @@ func (f *ProductRepo) Update(ctx context.Context, req *models.UpdateProduct) (in
 	return rowsAffected.RowsAffected(), nil
 }
 
-func (f *ProductRepo) Delete(ctx context.Context, req *models.ProductPrimarKey) error {
+func (f *ProductRepo) Delete(ctx context.Context, req *models.ProductPrimaryKey) error {
 
-	query := `
-		UPDATE
-			product
-		SET
-			deleted_at = now()
-		WHERE product_id = :$1
-	`
-	_, err := f.db.Exec(ctx, query, req.Id)
+	_, err := f.db.Exec(ctx, "UPDATE products SET deleted_at = now() WHERE id = $1", req.Id)
 	if err != nil {
 		return err
 	}

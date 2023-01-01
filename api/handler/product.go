@@ -43,7 +43,7 @@ func (h *HandlerV1) CreateProduct(c *gin.Context) {
 
 	resp, err := h.storage.Product().GetByPKey(
 		context.Background(),
-		&models.ProductPrimarKey{Id: id},
+		&models.ProductPrimaryKey{Id: id},
 	)
 
 	if err != nil {
@@ -73,7 +73,7 @@ func (h *HandlerV1) GetProductById(c *gin.Context) {
 
 	resp, err := h.storage.Product().GetByPKey(
 		context.Background(),
-		&models.ProductPrimarKey{Id: id},
+		&models.ProductPrimaryKey{Id: id},
 	)
 
 	if err != nil {
@@ -93,7 +93,6 @@ func (h *HandlerV1) GetProductById(c *gin.Context) {
 // @Tags Product
 // @Accept json
 // @Produce json
-// @Param category_id query string false "category_id"
 // @Param offset query string false "offset"
 // @Param limit query string false "limit"
 // @Success 200 {object} models.GetListProductResponse "GetProductBody"
@@ -129,9 +128,8 @@ func (h *HandlerV1) GetProductList(c *gin.Context) {
 	resp, err := h.storage.Product().GetList(
 		context.Background(),
 		&models.GetListProductRequest{
-			Limit:      int32(limit),
-			Offset:     int32(offset),
-			CategoryId: c.Query("category_id"),
+			Limit:  int32(limit),
+			Offset: int32(offset),
 		},
 	)
 
@@ -142,6 +140,7 @@ func (h *HandlerV1) GetProductList(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, resp)
+
 }
 
 // UpdateProduct godoc
@@ -153,7 +152,7 @@ func (h *HandlerV1) GetProductList(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "id"
-// @Param product body models.UpdateProduct true "CreateProductRequestBody"
+// @Param product body models.UpdateProductSwagger true "CreateProductRequestBody"
 // @Success 200 {object} models.Product "GetProductsBody"
 // @Response 400 {object} string "Invalid Argument"
 // @Failure 500 {object} string "Server Error"
@@ -163,9 +162,9 @@ func (h *HandlerV1) UpdateProduct(c *gin.Context) {
 		product models.UpdateProduct
 	)
 
-	product.Id = c.Param("id")
+	id := c.Param("id")
 
-	if product.Id == "" {
+	if id == "" {
 		log.Printf("error whiling update: %v\n", errors.New("required product id").Error())
 		c.JSON(http.StatusBadRequest, errors.New("required product id").Error())
 		return
@@ -177,6 +176,8 @@ func (h *HandlerV1) UpdateProduct(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
+
+	product.Id = id
 
 	rowsAffected, err := h.storage.Product().Update(
 		context.Background(),
@@ -197,7 +198,7 @@ func (h *HandlerV1) UpdateProduct(c *gin.Context) {
 
 	resp, err := h.storage.Product().GetByPKey(
 		context.Background(),
-		&models.ProductPrimarKey{Id: product.Id},
+		&models.ProductPrimaryKey{Id: id},
 	)
 
 	if err != nil {
@@ -232,7 +233,7 @@ func (h *HandlerV1) DeleteProduct(c *gin.Context) {
 
 	err := h.storage.Product().Delete(
 		context.Background(),
-		&models.ProductPrimarKey{
+		&models.ProductPrimaryKey{
 			Id: id,
 		},
 	)

@@ -1,5 +1,3 @@
-DROP TABLE IF EXISTS category;
-
-DROP TABLE IF EXISTS product;
-
 DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS products;
+DROP TABLE IF EXISTS categories;
