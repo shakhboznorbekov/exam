@@ -31,7 +31,7 @@ func (f *OrderRepo) Create(ctx context.Context, order *models.CreateOrder) (stri
 
 	query = `
 		INSERT INTO orders(
-			id,
+			orders_id,
 			description,
 			product_id,
 			updated_at
@@ -68,7 +68,7 @@ func (f *OrderRepo) GetByPKey(ctx context.Context, pkey *models.OrderPrimaryKey)
 
 	query := `
 	SELECT
-		orders.id,
+		orders.orders_id,
 		orders.description,
 		products.id,
 		products.name,
@@ -79,7 +79,7 @@ func (f *OrderRepo) GetByPKey(ctx context.Context, pkey *models.OrderPrimaryKey)
     	orders
 	JOIN products ON orders.product_id = products.id
 	JOIN categories ON products.category_id = categories.id
-	WHERE orders.deleted_at IS NULL AND products.deleted_at IS NULL AND categories.deleted_at IS NULL AND orders.id = $1
+	WHERE orders.deleted_at IS NULL AND products.deleted_at IS NULL AND categories.deleted_at IS NULL AND orders.orders_id = $1
 	`
 
 	err := f.db.QueryRow(ctx, query, pkey.Id).Scan(
@@ -126,7 +126,7 @@ func (f *OrderRepo) GetList(ctx context.Context, req *models.GetListOrderRequest
 	query := `
 	SELECT
 		COUNT(*) OVER(),
-		orders.id,
+		orders.orders_id,
 		orders.description,
 		products.id,
 		products.name,
@@ -136,7 +136,7 @@ func (f *OrderRepo) GetList(ctx context.Context, req *models.GetListOrderRequest
 	FROM
     	orders
 	JOIN products ON orders.product_id = products.id
-	JOIN categories ON products.category_id = categories.id
+	JOIN categories ON products.category_id = categoriesid
 	WHERE orders.deleted_at IS NULL AND products.deleted_at IS NULL AND categories.deleted_at IS NULL
 	`
 

@@ -8,7 +8,7 @@ CREATE TABLE categories (
 ); 
 CREATE TABLE products (
     id UUID PRIMARY KEY NOT NULL ,
-    name VARCHAR NOT NULL,
+    name VARCHAR NOT NULL UNIQUE,
     price  NUMERIC NOT NULL DEFAULT 0,
     category_id UUID NOT NULL REFERENCES categories(id), 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, 
